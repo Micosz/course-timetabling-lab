@@ -1,0 +1,16 @@
+{
+  "dataset_id": "pu-fal07-cs-weekly-lab-v1",
+  "schema_version": "1.0",
+  "source_xml": "../../unitime-purdue-c8-2007/extracted/pu-fal07-cs/pu-fal07-cs.xml",
+  "expected_source_sha256": "f4344acf6ffec09dbc44b6a7140cdd570de7c4bd4673955890fc6813791350e0",
+  "source_url": "https://www.unitime.org/data/josh/pu-fal07-cs.zip",
+  "teaching_weeks": 15,
+  "seed": 20261027,
+  "mixed_session_fraction": 0.6,
+  "lab_weeks_per_mixed_session": 4,
+  "synthetic_lab_capacities": [61, 36, 30, 26],
+  "external_student_conflict_policy": "record_only_department_scope",
+  "missing_instructor_policy": "unique_synthetic_instructor_per_source_class",
+  "meeting_shape_policy": "most_source_options_then_fewer_meetings_then_shorter_duration",
+  "external_calendar_policy": "repeat_all_committed_meetings_in_every_synthetic_week"
+}

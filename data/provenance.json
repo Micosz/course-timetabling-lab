@@ -1,0 +1,9 @@
+{
+  "dataset_id": "pu-fal07-cs-weekly-lab-v1",
+  "dataset_sha256": "c92918faeb82b4d5c9f702e0629fe5e8d48bcc1a1286c0b21d514a9021973968",
+  "gzip_sha256": "ab50a97735b0af601cf3ef2b468363c6e09fd9b6b9ba599b563a24ac50b714fd",
+  "source_xml_sha256": "f4344acf6ffec09dbc44b6a7140cdd570de7c4bd4673955890fc6813791350e0",
+  "source_url": "https://www.unitime.org/data/josh/pu-fal07-cs.zip",
+  "adapted": true,
+  "synthetic_lab_seed": 20261027
+}

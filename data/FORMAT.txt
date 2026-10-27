@@ -1,0 +1,124 @@
+Input contract: pu-fal07-cs-weekly-lab-v1, schema_version 1.0
+
+Main input is dataset.json (UTF-8 JSON).
+The adapter uses Python 3.9+ standard library only. There is no pre-existing solver
+in this project folder. This is a solver-neutral input contract for the next step.
+
+Identities and units
+  C<id> = source class/section. O<id> = source offering (inherited from parent if absent).
+  C<id>-M<n> = recurring session, ordered by day within the chosen class time pattern.
+  R<id>, T<id> = source room/instructor. SIM-* = explicitly synthetic resource.
+  Day 0 is Monday; day 6 is Sunday. Minute 540 is 09:00; 600 is 10:00.
+  Intervals are half-open: [start_minute, start_minute + duration_minutes).
+  Touching endpoints do not overlap. Source slot unit is five minutes.
+
+calendar
+  week_ids: synthetic teaching week IDs, initially 1..15.
+  There are no real dates or holiday exceptions in this version's active calendar.
+
+classes[]
+  id, course_id, source_class_id, source_parent_class_id: source lineage.
+  student_count: capacity requirement derived from source classLimit.
+  known_enrolled_student_count: observed assigned roster count, possibly smaller or zero.
+  instructor_ids, student_group_ids: resources required by all this class's meetings.
+  source_allowed_room_ids: original source domain, preserved for audit.
+  lecture_room_ids: original domain filtered by capacity.
+  lab_room_ids: capacity-compatible synthetic labs (an explicitly added domain).
+  session_ids: fixed recurring session IDs of this class.
+  time_options[]: choose ONE per class for the entire synthetic semester.
+    id: stable option ID, preserving its zero-based source XML time index.
+    meetings[]: one record per session with session_id, day, start_minute, duration_minutes.
+  All retained time options for a class have the same number of meetings and duration.
+  Individual sessions of a class may not independently mix different class time options.
+  source_dates_mask is provenance only; it is not the active synthetic calendar.
+
+recurring_sessions[]
+  id, class_id, ordinal, duration_minutes.
+  active_weeks: weeks in which the session must be scheduled.
+  lab_weeks: subset of active_weeks requiring kind=computer_lab.
+  In other weeks, lecture rooms and computer labs are both allowed. Using a lab then
+  contributes duration_minutes to the unnecessary-lab objective.
+
+rooms[]
+  id, source_room_id (null for synthetic labs), kind, schedulable, capacity.
+  kind is lecture, computer_lab, or background_only.
+  Only schedulable=true rooms may be chosen. There are 17 in the initial config.
+  The other 84 records support external timetable references, not extra free rooms.
+  availability[] has day, start_minute, end_minute. A whole meeting must fit one window.
+  Source sharing is already resolved for CS scheduler 24, including other departments
+  and unavailable periods. Do not treat the end of a window as an available minute.
+
+instructors[]
+  id, origin, source_instructor_id (null for missing-source synthetic instructors).
+  Source instructor availability is represented by allowed class times and locked
+  external classes. Synthetic instructors have no additional unknown restrictions.
+
+student_groups[]
+  Groups represent exact equivalence of assigned source rosters, not curricula.
+  id, source_student_ids, known_student_count, class_ids (target and external).
+  Shared group IDs prohibit overlapping assigned TARGET meetings.
+  An observed group count is not a substitute for class.student_count seat demand.
+
+external_classes[]
+  Existing committed/fixed bookings. These are not optimization variables.
+  room_ids, instructor_ids, student_group_ids, meetings[], active_weeks.
+  Fixed meetings keep their source days/start/duration but repeat over the synthetic calendar.
+  A target cannot overlap external bookings using the same selected room or instructor.
+  External student overlap is conditional on constraints.external_student_overlap_is_hard.
+  It is false for the main case, true for the strict-background variant.
+  External room records can be background_only; this does not make them selectable.
+
+constraints
+  non_overlap_groups[]: source DIFF_TIME/R and the time component of SAME_STUDENTS/R.
+    For listed classes, assigned actual meetings cannot overlap on the same day/week.
+    Applies to target-target and target-external pairs. External-external pairs are fixed
+    background context, not target decision variables.
+  same_time_of_day_groups[]: source SAME_TIME/R.
+    Between time-selected classes, the shorter interval must lie within the longer interval,
+    independently of day of week. Equal durations imply equal start. This does not mean
+    that day masks must be equal. Compare class time options, not per-week room choices.
+  one_time_option_per_class_for_all_weeks=true.
+  Capacity, room type for lab weeks, room occupancy, instructor occupancy, and target
+  student-group occupancy are hard. Missing required time or room is reported unassigned.
+  Each room must also be in the class's eligible domain and available for the full meeting.
+  Source SPREAD/soft preferences/travel distances are archived but not enforced/scored.
+  See conversion_audit.json and assumptions.json for the retained/omitted source rules.
+
+objectives (lexicographic minimization, only among solutions passing hard checks)
+  1. unassigned_weekly_sessions:
+     Count every (session_id, active_week) missing a valid time option or room once.
+     Never count only classes. A class with multiple weekly meetings has multiple sessions.
+  2. unnecessary_lab_minutes:
+     Sum duration_minutes for assigned sessions using a computer_lab outside lab_weeks.
+     Report hours as minutes / 60. Missing sessions do not add this cost, but remain worse
+     through criterion 1. Do not use reduced lab-hours alone to claim improvement.
+  3. room_changes:
+     Per recurring session, compare each assigned week's room with the latest previously
+     assigned week, skipping unassigned weeks. R1 -> missing -> R1 = 0 changes;
+     R1 -> missing -> R2 = 1. R1 -> R2 -> R1 = 2.
+  A scalar score used inside SA needs weights proven to preserve this priority for the
+  finite case. An arbitrary weighted sum does not define the final ranking.
+
+Suggested solution JSON (solution_template.json initially leaves all targets unassigned)
+  {
+    "dataset_id": "pu-fal07-cs-weekly-lab-v1",
+    "class_time_options": {"C1417": "C1417-T000", "C1418": null, "...": null},
+    "weekly_room_assignments": [
+      {"session_id": "C1417-M1", "week": 1, "room_id": "R94"}
+    ]
+  }
+  Example IDs show structure only; this is not a validated complete schedule.
+  Missing time option => all active meetings of that class are unassigned.
+  Selected time option with no room record => that session/week is unassigned.
+  A room record requires a selected class time option and must be unique by session/week.
+  The solver must validate hard constraints before reporting a candidate's objectives.
+  validate_dataset.py checks INPUT consistency/local domains; it is not a solution checker.
+
+Provenance and rebuild
+  source.xml_path_relative_to_config is relative to config.json's directory.
+  source.sha256 pins the raw XML. The adapter only reads the original XML.
+  conversion_audit.json preserves source group constraints and retained/dropped time indices.
+  assumptions.json defines synthetic decisions separately from source observations.
+  manifest.json records checksums of input code/config and generated outputs.
+  The same source, config and Python runtime rebuild the same generated bytes.
+  Changing the dataset seed is a new synthetic instance, not an extra algorithm run.

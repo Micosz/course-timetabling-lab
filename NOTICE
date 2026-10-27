@@ -1,0 +1,21 @@
+The MIT license covers the application code and original application documentation.
+It does not relicense the UniTime/Purdue source data or claim ownership of it.
+
+data/fall-cs.json.gz is an adapted synthetic course-timetabling research dataset
+derived from the publicly provided Purdue Fall 2007 CS dataset:
+https://www.unitime.org/uct_datasets.php
+https://www.unitime.org/data/josh/pu-fal07-cs.zip
+
+Source providers retain their rights. Consult the source provider for reuse terms
+beyond this educational/research use. The source data was anonymized by its provider;
+IDs retained here are benchmark IDs. Synthetic lab rooms, weekly lab requirements,
+calendar and missing-instructor placeholders are assumptions, not source facts.
+Detailed transformation provenance is in data/assumptions.json and provenance.json.
+
+Pyodide is loaded from jsDelivr at runtime, not vendored into this repository.
+It and the Python distribution retain their upstream licenses.
+https://github.com/pyodide/pyodide
+
+This app was implemented with assistance from OpenAI Codex. Method implementations,
+decoder choices, constraints and limits are documented for review; using these tools
+does not establish original research results or an institutional scheduling solution.

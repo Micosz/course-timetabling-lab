@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2456db">
+  <meta name="description" content="ห้องทดลองเปรียบเทียบอัลกอริทึมจัดตารางเรียนและการใช้ Lab รายสัปดาห์ รัน Python ในเบราว์เซอร์ พร้อมบันทึกผลและดาวน์โหลดข้อมูล">
+  <title>Timetable Lab · ห้องทดลองจัดตารางเรียน</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Timetable Lab หน้าแรก"><span class="brand-mark">▦</span><span>Timetable<span class="brand-light"> Lab</span></span></a>
+    <nav class="nav" aria-label="เมนูหลัก">
+      <button class="nav-item active" data-view="experiment" aria-current="page">การทดลอง</button>
+      <button class="nav-item" data-view="results">ผลเปรียบเทียบ <span id="result-count" class="count">0</span></button>
+      <button class="nav-item" data-view="history">ประวัติ</button>
+      <button class="nav-item" data-view="code">โค้ด Python</button>
+    </nav>
+    <span class="local-badge"><i></i> บันทึกในเบราว์เซอร์นี้</span>
+  </header>
+  <main>
+    <div id="banner" class="banner hidden" role="alert"></div>
+    <section id="view-experiment" class="view">
+      <div class="page-heading"><div><p class="eyebrow">WEEKLY LAB · SEARCH EXPERIMENTS</p><h1>ห้องทดลองจัดตารางเรียน</h1><p class="lead">เลือกวิธี ตั้งค่า แล้วเปรียบเทียบผลบนโจทย์เดียวกัน</p></div><span class="version">RESEARCH WORKSPACE <b>01</b></span></div>
+      <section class="dataset-bar" aria-label="ชุดข้อมูล">
+        <div class="dataset-icon">▤</div><div class="dataset-title"><span class="micro">ชุดข้อมูลปัจจุบัน</span><strong id="dataset-name">กำลังโหลด Fall CS…</strong><span id="dataset-meta" class="muted">เตรียมข้อมูลจำลองสำหรับ Lab รายสัปดาห์</span></div>
+        <div class="dataset-actions"><label class="button secondary compact" for="dataset-upload">↑ อัปโหลด JSON</label><input id="dataset-upload" type="file" accept=".json,.gz,application/json" hidden><button id="download-dataset" class="button ghost compact">↓ ข้อมูล</button><button id="reset-dataset" class="button ghost compact">Fall CS เดิม</button></div>
+      </section>
+      <div class="stats" id="dataset-stats"><div><span>คลาสที่ต้องจัด</span><strong>—</strong></div><div><span>คาบรายสัปดาห์</span><strong>—</strong></div><div><span>ห้องบรรยาย + Lab</span><strong>—</strong></div><div><span>สัปดาห์จำลอง</span><strong>—</strong></div></div>
+      <div class="workspace-grid">
+        <div class="setup-stack">
+          <section class="panel"><div class="section-top"><div><span class="step">01</span><h2>เลือกอัลกอริทึม</h2></div><span class="muted small">ใช้ตัวจัดตารางและกฎกลางร่วมกัน</span></div>
+            <div class="algorithm-grid">
+              <label class="algorithm-card greedy"><input type="checkbox" name="algorithm" value="greedy" checked><span class="algo-symbol">G</span><strong>Greedy</strong><span class="algo-type">วิธีพื้นฐาน</span><p>จัดคลาสที่มีทางเลือกน้อยก่อน</p></label>
+              <label class="algorithm-card hc"><input type="checkbox" name="algorithm" value="hc" checked><span class="algo-symbol">HC</span><strong>Hill Climbing</strong><span class="algo-type">Random restart</span><p>ปรับคำตอบและเริ่มใหม่เมื่อไม่ดีขึ้น</p></label>
+              <label class="algorithm-card sa"><input type="checkbox" name="algorithm" value="sa" checked><span class="algo-symbol">SA</span><strong>Simulated Annealing</strong><span class="algo-type">Single solution</span><p>ค้นหาต่อด้วยอุณหภูมิที่ค่อย ๆ ลดลง</p></label>
+              <label class="algorithm-card ga"><input type="checkbox" name="algorithm" value="ga" checked><span class="algo-symbol">GA</span><strong>Genetic Algorithm</strong><span class="algo-type">Population search</span><p>คัดเลือก ผสม และกลายพันธุ์คำตอบ</p></label>
+            </div>
+            <label class="check-row"><input type="checkbox" id="include-custom"> เพิ่มวิธีจากโค้ด Python ของฉัน <button class="text-button" data-view="code" type="button">เปิดตัวแก้ไข ↗</button></label>
+          </section>
+          <section class="panel"><div class="section-top"><div><span class="step">02</span><h2>กำหนดการรัน</h2></div></div>
+            <label class="field">ชื่อการทดลอง<input id="experiment-name" value="Fall CS · Algorithm comparison" maxlength="100"></label>
+            <div class="form-grid four"><label class="field">งบประเมินคำตอบ / รัน<input id="budget" type="number" value="50" min="1" max="100000"><small>รวมการสร้างคำตอบเริ่มต้น</small></label><label class="field">เวลาสูงสุด / รัน (วินาที)<input id="time-limit" type="number" value="60" min="1" max="3600"><small>หยุดเมื่อถึงงบหรือเวลาก่อน</small></label><label class="field">Seed เริ่มต้น<input id="start-seed" type="number" value="42" min="0" max="4294967295"><small>แยกจาก seed สร้างข้อมูล</small></label><label class="field">จำนวนรัน / วิธี<input id="repeats" type="number" value="3" min="1" max="100"><small>ใช้ seed ต่อเนื่องกัน</small></label></div>
+            <details class="advanced"><summary>พารามิเตอร์ของแต่ละวิธี <span>ปรับเพิ่มเติม</span></summary><div class="advanced-content">
+              <div class="parameter-block"><h3>HC <span>การเริ่มใหม่</span></h3><label class="field">เริ่มใหม่หลังไม่ดีขึ้นกี่ครั้ง<input id="hc-patience" type="number" value="20" min="1" max="10000"></label></div>
+              <div class="parameter-block"><h3>SA <span>อุณหภูมิ</span></h3><div class="form-grid"><label class="field">การยอมรับเริ่มต้น<input id="sa-acceptance" type="number" value="0.8" min="0.01" max="0.99" step="0.01"></label><label class="field">อัตราลดอุณหภูมิ<input id="sa-cooling" type="number" value="0.97" min="0.01" max="0.9999" step="0.001"></label></div><small>ปรับอุณหภูมิเริ่มต้นจากค่าที่วัดได้ โดยนับการประเมินในงบเดียวกัน</small></div>
+              <div class="parameter-block"><h3>GA <span>ประชากรและตัวดำเนินการ</span></h3><div class="form-grid three"><label class="field">ประชากร<input id="ga-population" type="number" value="12" min="4" max="100"></label><label class="field">Tournament<input id="ga-tournament" type="number" value="3" min="2" max="100"></label><label class="field">Elite<input id="ga-elites" type="number" value="1" min="1" max="99"></label><label class="field">Crossover<input id="ga-crossover" type="number" value="0.9" min="0" max="1" step="0.05"></label><label class="field">Mutation<input id="ga-mutation" type="number" value="0.3" min="0" max="1" step="0.05"></label></div></div>
+            </div></details>
+          </section>
+        </div>
+        <aside class="sidebar-stack">
+          <section class="panel run-panel"><p class="eyebrow">READY TO COMPARE</p><h2 id="queue-count">12 รัน</h2><p id="queue-description" class="muted">4 วิธี × 3 seed</p><div class="divider"></div><div class="mini-row"><span>ลำดับความสำคัญ</span><span class="tag">Lexicographic</span></div><ol class="objective-list"><li><b>1</b><span>คาบที่ยังจัดไม่ได้<small>น้อยที่สุดก่อน</small></span></li><li><b>2</b><span>ใช้ Lab โดยไม่จำเป็น<small>เปรียบเทียบเมื่อข้อแรกเท่ากัน</small></span></li><li><b>3</b><span>การเปลี่ยนห้อง<small>เปรียบเทียบเมื่อสองข้อแรกเท่ากัน</small></span></li></ol><p class="rule-note">ทุกคำตอบต้องผ่านข้อห้ามก่อนนำมาจัดอันดับ</p><button id="run-button" class="button primary wide" disabled>▶ เริ่มการทดลอง</button><button id="stop-button" class="button secondary wide" disabled>หยุดการทดลอง</button><p class="micro center">รัน Python บนเครื่องผ่านเบราว์เซอร์<br>ผลไม่ถูกส่งขึ้น GitHub อัตโนมัติ</p></section>
+          <section id="progress-panel" class="panel progress-panel" aria-live="polite"><div class="mini-row"><strong id="run-status">พร้อมเมื่อโหลดข้อมูลเสร็จ</strong><span id="run-fraction" class="mono">0 / 0</span></div><progress id="run-progress" max="1" value="0"></progress><p id="progress-detail" class="muted small">การเปิดครั้งแรกจะดาวน์โหลด Python runtime</p><div id="live-metrics" class="live-metrics"></div></section>
+          <details class="panel assumptions"><summary>ข้อมูลจำลองและขอบเขต</summary><p>Fall CS ใช้ปฏิทินจำลอง 15 สัปดาห์ ห้องเดิม 13 ห้องถูกกำหนดเป็นห้องบรรยาย และเพิ่ม Lab จำลอง 4 ห้อง</p><p>134 คาบประจำใช้ Lab คนละ 4 สัปดาห์ Seed สร้างข้อมูลคือ 20261027 ผู้สอนที่ขาดใช้รหัสจำลอง</p><p>นักศึกษาห้ามชนกันภายใน CS ส่วนคาบภายนอกล็อกห้องและผู้สอนตาม policy ของกรณีหลัก</p><a href="./data/START_HERE.txt" target="_blank" rel="noopener">อ่านสมมติฐานทั้งหมด ↗</a><p class="micro" id="dataset-hash"></p></details>
+        </aside>
+      </div>
+    </section>
+
+    <section id="view-results" class="view hidden">
+      <div class="page-heading"><div><p class="eyebrow">RESULTS & EVIDENCE</p><h1>ผลเปรียบเทียบ</h1><p class="lead" id="results-description">ผลจากการรันจริงจะปรากฏที่นี่</p></div><div class="actions"><button id="export-csv" class="button secondary" disabled>↓ CSV ผลแต่ละรัน</button><button id="export-json" class="button primary" disabled>↓ บันทึกชุดผล JSON</button></div></div>
+      <div id="results-empty" class="empty panel"><span>▥</span><h2>เริ่มจากการทดลองแรก</h2><p>เลือกวิธีและกดรัน ผลจะถูกตรวจข้อห้ามก่อนนำมาเปรียบเทียบ</p><button class="button secondary" data-view="experiment">ตั้งค่าการทดลอง</button></div>
+      <div id="results-content" class="hidden">
+        <div class="result-meta" id="result-meta"></div>
+        <section class="panel"><div class="section-top"><h2>ภาพรวมแต่ละวิธี</h2><span class="muted small">ใช้เฉพาะคำตอบที่ตรวจผ่านในการสรุปคุณภาพ</span></div><div class="table-scroll"><table><thead><tr><th>อัลกอริทึม</th><th>ผ่าน / ทั้งหมด</th><th>คาบที่ขาด<br><small>มัธยฐาน</small></th><th>Lab ไม่จำเป็น (ชม.)<br><small>เฉลี่ย ± SD</small></th><th>เปลี่ยนห้อง<br><small>มัธยฐาน</small></th><th>เวลาค้นหา<br><small>เฉลี่ย วินาที</small></th></tr></thead><tbody id="summary-body"></tbody></table></div></section>
+        <section class="panel"><div class="section-top"><h2>คำตอบดีที่สุดระหว่างค้นหา</h2><div class="actions"><label class="inline-label">Seed <select id="chart-seed"></select></label><label class="inline-label">ตัวชี้วัด <select id="chart-metric"><option value="0">คาบที่ยังจัดไม่ได้</option><option value="1">Lab ไม่จำเป็น (ชม.)</option><option value="2">ครั้งเปลี่ยนห้อง</option></select></label></div></div><div id="convergence-chart" class="chart" aria-label="กราฟคำตอบดีที่สุดเทียบจำนวนครั้งประเมิน"></div><div id="chart-legend" class="legend"></div><p class="micro">แกนนอนเป็นจำนวนครั้งประเมินคำตอบ Greedy จบเมื่อสร้างคำตอบแรกได้ เวลาที่หมดและรันที่ผิดพลาดแสดงแยกในผลรายรัน</p></section>
+        <section class="panel"><div class="section-top"><h2>ผลแต่ละรัน</h2><span class="muted small">เวลาค้นหาแยกจากเวลาตรวจคำตอบ</span></div><div class="table-scroll"><table><thead><tr><th>วิธี / Seed</th><th>สถานะ</th><th>คาบที่ขาด</th><th>Lab เกิน (ชม.)</th><th>เปลี่ยนห้อง</th><th>ประเมิน</th><th>เวลา (วิ.)</th><th>ข้อห้ามผิด</th></tr></thead><tbody id="runs-body"></tbody></table></div></section>
+        <section class="panel"><div class="section-top"><div><h2>ตรวจตารางที่ได้</h2><span id="schedule-description" class="muted small"></span></div><div class="actions"><label class="inline-label">รัน <select id="schedule-run"></select></label><label class="inline-label">สัปดาห์ <select id="schedule-week"></select></label><button id="export-schedule" class="button secondary compact">↓ ตาราง CSV</button></div></div><div class="table-scroll timetable"><table><thead><tr><th>วัน</th><th>เวลา</th><th>คลาส / คาบประจำ</th><th>ห้อง</th><th>ต้องใช้ Lab</th></tr></thead><tbody id="schedule-body"></tbody></table></div><details class="unassigned"><summary id="unassigned-title">คาบที่ยังจัดไม่ได้</summary><div id="unassigned-list"></div></details><details><summary>รายละเอียดการตรวจและข้อผิดพลาด</summary><pre id="validation-details"></pre></details></section>
+      </div>
+    </section>
+
+    <section id="view-history" class="view hidden"><div class="page-heading"><div><p class="eyebrow">SAVED EXPERIMENTS</p><h1>ประวัติการทดลอง</h1><p class="lead">เก็บผลหลังแต่ละรันในเบราว์เซอร์นี้ และดาวน์โหลดไว้ใช้อ้างอิงได้</p></div><label class="button secondary" for="import-results">↑ นำเข้าชุดผล JSON</label><input id="import-results" type="file" accept=".json" hidden></div><div id="history-list" class="history-list"></div><p class="micro">การล้างข้อมูลเว็บไซต์หรือใช้คนละเบราว์เซอร์จะไม่เห็นประวัติเดิม ควรดาวน์โหลดชุดผล JSON หลังการทดลอง</p></section>
+
+    <section id="view-code" class="view hidden"><div class="page-heading"><div><p class="eyebrow">EXTEND THE EXPERIMENT</p><h1>โค้ด Python</h1><p class="lead">เพิ่มวิธีค้นหาของตัวเอง โดยใช้ตัวจัดตารางและงบประเมินกลาง</p></div><a class="button secondary" href="./python/algorithms.py" download>↓ โค้ด 4 วิธีหลัก</a></div><div class="code-layout"><section class="panel"><div class="section-top"><h2>custom_algorithm.py</h2><div class="actions"><label class="button secondary compact" for="code-upload">↑ เปิดไฟล์ .py</label><input id="code-upload" type="file" accept=".py,text/x-python" hidden><button id="download-code" class="button secondary compact">↓ ดาวน์โหลดโค้ด</button></div></div><label class="field">ฟังก์ชัน solve(problem, context, parameters)<textarea id="custom-code" class="code-editor" rows="20" spellcheck="false" autocapitalize="off" aria-label="โค้ดอัลกอริทึม Python"></textarea></label><label class="field">Parameters ของโค้ดเพิ่มเติม (JSON)<textarea id="custom-parameters" class="code-editor short" rows="3" spellcheck="false">{}</textarea></label><button id="save-code" class="button primary">ใช้โค้ดนี้ในการทดลอง</button><span id="code-status" class="muted small"></span></section><aside class="panel code-help"><h2>สัญญาการใช้งาน</h2><p>ค้นหาบนลำดับคลาสและตัวเลือกเวลา แล้วให้ decoder กลางจัดห้องรายสัปดาห์</p><dl><dt>context.initial</dt><dd>คำตอบตั้งต้นเดียวกับ Greedy นับเป็นการประเมินครั้งที่ 1</dd><dt>context.evaluate(genome)</dt><dd>ประเมินคำตอบและนับงบ เก็บ best-so-far ให้อัตโนมัติ</dd><dt>problem.mutate(genome, rng)</dt><dd>สลับลำดับคลาสและเปลี่ยนตัวเลือกเวลา</dd><dt>problem.random_genome(rng)</dt><dd>สร้างจุดเริ่มใหม่ด้วย RNG ของรันนั้น</dd><dt>context.check()</dt><dd>หยุดเมื่อถึงงบหรือเวลา</dd></dl><p>คืน context.best.solution หรือ Candidate ที่ได้จาก evaluate ตารางที่คืนจะถูกตรวจข้อห้ามอีกครั้ง</p><p class="micro">โค้ดรันใน Web Worker ของเบราว์เซอร์ ใช้ Python standard library ได้ โค้ดที่ไม่จบจะถูกหยุดเมื่อเกินเวลาของรันนั้น</p></aside></div></section>
+    <footer>Timetable Lab <span>·</span> Fall CS + synthetic weekly labs <span>·</span> <a href="./README.md" target="_blank" rel="noopener">วิธีใช้งานและระเบียบวิธีทดลอง</a><span>·</span><span id="app-version">Engine 1.0.0</span></footer>
+  </main>
+</body>
+</html>

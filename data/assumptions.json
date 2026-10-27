@@ -1,0 +1,93 @@
+[
+  {
+    "id": "A01",
+    "field": "calendar",
+    "assumption": "ใช้ปฏิทินจำลอง 15 สัปดาห์ ทุกคลาสเปิดสอนครบทุกสัปดาห์ ไม่มีวันหยุด; ไม่ใช่ปฏิทิน Fall 2007 จริง",
+    "source_difference": "ต้นฉบับมี date masks หลายแบบ รวมถึง 17 target classes ที่มีช่วงสอนสั้นกว่าแบบหลัก"
+  },
+  {
+    "id": "A02",
+    "field": "classes.time_options",
+    "assumption": "ต่อคลาส เลือกรูปแบบจำนวนคาบ/ความยาวที่มีตัวเลือกต้นฉบับมากที่สุด; ถ้าเสมอเลือกจำนวนคาบน้อยกว่าแล้วความยาวน้อยกว่า",
+    "reason": "ทำให้จำนวน recurring sessions และตัวหารคาบรายสัปดาห์คงที่ระหว่างอัลกอริทึม โดยรักษานาทีเรียนต่อสัปดาห์เดิม",
+    "affected_classes": 24,
+    "dropped_time_options": 137
+  },
+  {
+    "id": "A03",
+    "field": "rooms.kind",
+    "assumption": "กำหนดห้องต้นฉบับ 13 ห้องใน target domains เป็นห้องบรรยายในแบบจำลอง; ไม่ใช่การยืนยันประเภทห้องจริง",
+    "preserved": "รหัสห้อง ความจุ รายการห้องเดิมของแต่ละคลาส และ room-sharing ของ scheduler 24"
+  },
+  {
+    "id": "A04",
+    "field": "rooms.SIM-LAB-*",
+    "assumption": "เพิ่มห้องคอมพิวเตอร์จำลอง 4 ห้อง ความจุ [61, 36, 30, 26] คน เป็นทรัพยากรใหม่แยกจากห้องจริง",
+    "availability": "จันทร์-ศุกร์ 00:00-24:00; แต่คลาสยังเลือกได้เฉพาะเวลาต้นฉบับ; ไม่มีการจองภายนอกของ Lab จำลอง",
+    "compatibility": "ทุก Lab จำลองรองรับกิจกรรมทุกชนิดของกรณีนี้ได้เมื่อความจุพอ",
+    "impact": "เพิ่มทรัพยากรและขยายโดเมนห้องด้วย Lab จำลอง ทำให้ความยากต่างจาก benchmark เดิม"
+  },
+  {
+    "id": "A05",
+    "field": "instructors",
+    "assumption": "คลาสที่ไม่มีผู้สอนใช้รหัสผู้สอนจำลองหนึ่งคนต่อคลาส ไม่สร้างความสัมพันธ์ร่วมผู้สอนที่ไม่ทราบ",
+    "affected_classes": 143,
+    "impact": "อาจประเมินความหนาแน่นผู้สอนต่ำกว่าสถานการณ์จริง"
+  },
+  {
+    "id": "A06",
+    "field": "classes.student_count",
+    "assumption": "ใช้ classLimit เป็นจำนวนที่นั่งที่ต้องรองรับ ไม่ใช่จำนวนผู้ลงทะเบียนจริง; ใช้ roster ที่มีจริงสำหรับความขัดแย้ง",
+    "zero_observed_enrollment_classes": 15
+  },
+  {
+    "id": "A07",
+    "field": "student_groups",
+    "assumption": "รวมเฉพาะนักศึกษาที่มีรายการคลาสที่ลงไว้เหมือนกันทุกตัวเป็นกลุ่มเชิงเทคนิค และห้ามกลุ่มซ้อนเวลา",
+    "department_scope": "กรณีหลักห้ามกลุ่มนักศึกษาซ้อนกันระหว่าง target classes ใน CS; กับ committed classes ภายนอกให้เก็บ roster ไว้เป็นข้อมูล แต่ไม่ใช้เป็น hard conflict",
+    "strict_background_variant": "ไฟล์ strict-background ยกระดับ student overlap กับ committed classes ภายนอกเป็น hard ด้วย โดยใช้ข้อมูล Lab/เวลา/ห้องเดียวกับกรณีหลัก",
+    "impact": "ต้นฉบับมี student conflicts เป็น soft และอาจแก้ด้วย re-sectioning; การยกระดับเป็น hard ทั้งหมดอาจทำให้กรณีเข้มงวดจัดครบไม่ได้; ไม่ทำ re-sectioning หรือสร้างหลักสูตร/cohort ที่ไม่มีในข้อมูล",
+    "outside_xml_class_references_omitted": []
+  },
+  {
+    "id": "A08",
+    "field": "constraints",
+    "assumption": "เก็บ non-overlap จาก DIFF_TIME/R และ SAME_STUDENTS/R รวมทั้ง SAME_TIME/R; เก็บ source constraints ทุกตัวไว้ตรวจย้อนหลัง",
+    "omitted": "SPREAD, soft preferences ของเวลา/ห้อง/กลุ่ม, ระยะเดินทาง, departmental balancing และเกณฑ์ UniTime อื่นที่ไม่อยู่ในเป้าหมายโครงงาน",
+    "retained_non_overlap_groups": 92,
+    "retained_same_time_groups": 8,
+    "archived_unscored_constraints": 36
+  },
+  {
+    "id": "A09",
+    "field": "external_classes",
+    "assumption": "เก็บ committed classes ทั้งหมดเป็นการจองล็อก และใช้รูปแบบสัปดาห์เดิมซ้ำครบ 15 สัปดาห์จำลอง",
+    "enforced_in_main": "ห้อง ผู้สอน และ explicit source distribution rules ที่เก็บไว้; student overlap กับภายนอกขึ้นกับ variant A07",
+    "impact": "อาจจำกัดเวลามากกว่าปฏิทินจริงของคลาสภายนอกบางคลาส; ไม่ใช่ผลพิสูจน์ว่าตารางทั้งหมดจัดครบได้"
+  },
+  {
+    "id": "A10",
+    "field": "recurring_sessions.lab_weeks",
+    "assumption": "สุ่มเลือก 60% ของ recurring sessions (ปัดใกล้สุด) ให้ใช้ Lab 4 จาก 15 สัปดาห์โดยไม่ซ้ำ ส่วนที่เหลือไม่ต้องใช้ Lab",
+    "seed": 20261027,
+    "mixed_session_count": 134,
+    "lecture_only_session_count": 89,
+    "impact": "เป็นสถานการณ์ทดลอง ไม่ใช่พฤติกรรมการใช้ Lab ที่สำรวจจริง; seed นี้เป็น seed สร้างข้อมูล ไม่ใช่ seed ของอัลกอริทึม"
+  },
+  {
+    "id": "A11",
+    "field": "names_and_units",
+    "assumption": "ใช้รหัส O*/C*/R*/T* แทนชื่อที่ต้นฉบับไม่ระบุ; คลาสลูกที่ไม่มี offering ใช้ offering จาก parent chain ของต้นฉบับ; แปลง source slot ละ 5 นาทีเป็นนาทีหลังเที่ยงคืน; วัน 0=จันทร์ ถึง 6=อาทิตย์; ช่วงเวลาเป็น [start,end)"
+  },
+  {
+    "id": "A12",
+    "field": "objectives",
+    "assumption": "แต่ละ meeting ใน pattern เป็น recurring session แยก; เลือกหนึ่ง time option ต่อคลาสร่วมกันทุกสัปดาห์ แต่กำหนดห้องแยก session/week ได้",
+    "priority": [
+      "unassigned_weekly_sessions",
+      "unnecessary_lab_minutes",
+      "room_changes"
+    ],
+    "room_changes": "เทียบห้องของ recurring session เดียวกันกับสัปดาห์ก่อนหน้าล่าสุดที่จัดได้ ข้ามสัปดาห์ที่ยังจัดไม่ได้"
+  }
+]
