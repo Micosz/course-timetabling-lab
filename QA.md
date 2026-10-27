@@ -9,6 +9,9 @@ Checked 2026-10-27. These are implementation checks, not final comparative resea
 - Actual Safari browser runs with Pyodide 314.0.7: four methods × seed 42, budget 12. All four returned hard violations = 0 and budget accounting was correct (Greedy used 1; search methods used 12).
 - Browser history survives page reload and reopens completed run data.
 - Downloaded JSON contains four raw runs, the exact input dataset with matching SHA-256, and the five Python source files actually used by the worker. Downloaded CSV contains four result rows.
+- Browser JSON import reopens all four runs and explicitly labels them as imported, without rerunning.
+- Browser custom Python template executes with the shared budget (5 evaluations) and passes final audit.
+- Dataset converter rebuild matches the exact pinned adapted dataset SHA-256.
 - Native CLI smoke: four methods × seed 42, budget 4; JSON and CSV written successfully.
 
 Automated CI reruns the Python contract/regression suite. This record does not claim every browser/version or all custom Python programs have been tested. Imported bundles are not re-executed or independently authenticated merely by importing them.
